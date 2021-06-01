@@ -1,8 +1,9 @@
 import React from 'react';
 import './App.css';
-import {TextField, Typography, Button, List, ListItem, ListItemText} from '@material-ui/core';
+import {TextField, Typography, Button, List, ListItem, ListItemText, Dialog, DialogContent, DialogContentText} from '@material-ui/core';
 import {KeyboardDatePicker, KeyboardTimePicker} from '@material-ui/pickers';
 import SaveIcon from '@material-ui/icons/Save';
+import {Alert} from '@material-ui/lab';
 
 class App extends React.Component {
   constructor(props) {
@@ -14,7 +15,9 @@ class App extends React.Component {
       startDate: null,
       startTime: null,
       endDate: null,
-      endTime: null
+      endTime: null,
+      isBlank: false,
+      isSuccess: false
     }
   }
 
@@ -22,7 +25,23 @@ class App extends React.Component {
     const {
       title, content, startDate, startTime, endDate, endTime
     } = this.state;
-    if (!title || !content || !startDate || !startTime || !endDate || !endTime) {
+    if (!title) {
+      alert("제목을 입력해주세요.");
+      return false;
+    } else if (!content) {
+      alert("상세 내용을 입력해주세요.");
+      return false;
+    } else if (!startDate) {
+      alert("시작 예정일을 입력해주세요.");
+      return false;
+    } else if (!startTime) {
+      alert("시작 시간을 입력해주세요.");
+      return false;
+    } else if (!endDate) {
+      alert("종료 예정일을 입력해주세요.");
+      return false;
+    } else if (!endTime) {
+      alert("종료 시간을 입력해주세요.");
       return false;
     }
     return true;
@@ -33,16 +52,17 @@ class App extends React.Component {
       const {todoList, title, content, startDate, startTime, endDate, endTime} = this.state;
       todoList.push({title: title.trim(), content: content.trim(), startDate, startTime, endDate, endTime});
       this.setState({ 
+        isSuccess: true,
         todoList,
-        // title: "",
-        // content: "",
-        // startDate: null,
-        // startTime: null,
-        // endDate: null,
-        // endTime: null
+        title: "",
+        content: "",
+        startDate: null,
+        startTime: null,
+        endDate: null,
+        endTime: null
       });
     } else {
-      alert("입력값을 확인해 주세요.");
+      this.setState({isBlank: true});
     }
   }
 
@@ -106,12 +126,42 @@ class App extends React.Component {
           >
             Save
           </Button>
+          <Dialog
+            open={this.state.isBlank}
+            onClose={() => this.setState({isBlank:false})}
+            aria-labelledby="alert-dialog-title"
+            aria-describedby="alert-dialog-description"
+          >
+            <DialogContent>
+              <DialogContentText id="alert-dialog-description">
+                <Alert variant="outlined" severity="error">빈칸을 입력해주세요!</Alert>
+              </DialogContentText>
+            </DialogContent>
+            <Button autoFocus onClick={() => this.setState({isBlank:false})} color="primary">
+              OK
+            </Button>
+          </Dialog>
+          <Dialog
+            open={this.state.isSuccess}
+            onClose={() => this.setState({isSuccess:false})}
+            aria-labelledby="alert-dialog-title"
+            aria-describedby="alert-dialog-description"
+          >
+            <DialogContent>
+              <DialogContentText id="alert-dialog-description">
+                <Alert variant="outlined" severity="success">저장에 성공하였습니다!</Alert>
+              </DialogContentText>
+            </DialogContent>
+            <Button autoFocus onClick={() => this.setState({isSuccess:false})} color="primary">
+              OK
+            </Button>
+          </Dialog>
         </div>
         <div className="list-area">
         <List>
             {this.state.todoList.map((todoItem, idx) => {
               const {
-                title, content, startDate, startTime, endDate, endTime
+                title, startDate, startTime, endDate, endTime
               } = todoItem;
               return (
                 <ListItem key={idx} role={undefined} dense button>
